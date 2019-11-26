@@ -14,18 +14,71 @@ import json
 import random
 from google.cloud import translate_v2 as translate
 import os
+import xml.etree.ElementTree as ET
 
 
 museum_items = ["ship", "carriage"]
 obj_hist = []
 weather_state = "sun"
-
+code = []
+story = []
 
 def index(request):
     obj_hist.clear()
+    code.clear()
+    story.clear()
     global weather_state
     weather_state = "sun"
     return render(request, 'polls/index.html')
+
+
+def test(request):
+    return render(request, 'polls/readyToDraw.html')
+
+
+def goLeft(request):
+    code.append("goLeft")
+    return render(request, 'polls/readyToDraw.html', {'actions': code})
+
+
+def fly(request):
+    code.append("fly")
+    return render(request, 'polls/readyToDraw.html', {'actions': code})
+
+
+def goRight(request):
+    code.append("goRight")
+    return render(request, 'polls/readyToDraw.html', {'actions': code})
+
+
+def ascend(request):
+    code.append("ascend")
+    return render(request, 'polls/readyToDraw.html', {'actions': code})
+
+
+def write_code(request):
+    f = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml", "a")
+    f.write("<list>\n")
+    for x in code:
+        if x == "goRight":
+            f.write("\t<action name = 'goRight'></action>\n")
+        elif x == "goLeft":
+            f.write("\t<action name = 'goLeft'></action>\n")
+        elif x == "fly":
+            f.write("\t<action name = 'fly'></action>\n")
+        elif x == "ascend":
+            f.write("\t<action name = 'ascend'></action>\n")
+    f.write("</list>")
+    return render(request, 'polls/readyToDraw.html')
+
+
+def actions():
+    actions = []
+    tree = ET.parse("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml")
+    root = tree.getroot()
+    for child in root:
+        actions.append(child.attrib["name"])
+    return actions
 
 
 def show_info(request):
@@ -40,8 +93,11 @@ def recordAndDraw(request):
     global weather_state
     context = record()
     cumle = context["origin"]
+    story.append(cumle)
+    s = process_Story()
     sentence = context["text"]
     obj_list = sentence_processing(sentence)
+    action = actions()
     for m in obj_list:
         obj = json.loads(m)
         if "state" in obj:
@@ -59,8 +115,8 @@ def recordAndDraw(request):
             y = json.loads("{" + p[i] + "}")
             obj["strokeArray"] = y["drawing"]
             obj_hist.append(json.dumps(obj))
-    return render(request, 'polls/demo.html', {'origin': cumle, 'sentence': sentence, 'json': obj_hist,
-                                               'weather': weather_state})
+    return render(request, 'polls/demo.html', {'story': "".join(s), 'sentence': sentence, 'json': obj_hist,
+                                               'weather': weather_state, 'actions': action})
 
 
 def start_demo(request):
@@ -85,16 +141,34 @@ def draw_objects(request):
 
 def sentence_processing(sentence):
     doc = nlp(sentence)
+
     main_lst_json = []
     weather = isWeather(doc)
     if (weather):
         main_lst_json.append(Weather(state=weather).to_json())
     else:
         main_lst = extract_main_object(doc)
-        for main_object in main_lst:
-            main_lst_json.append(match_features(extract_features(doc, main_object), main_object).to_json())
+        for main in main_lst:
+            main_obj = match_features(extract_features(doc, main), main)
+            conj_lst = list(main.conjuncts)
+            for conj in conj_lst:
+
+                conj_obj = match_features(extract_features(doc, conj), conj)
+                if (main_obj.action != None):
+                    conj_obj.action = main_obj.action
+                else:
+                    main_obj.action = conj_obj.action
+
+                if (main_obj.location != "random"):
+                    conj_obj.location = main_obj.location
+                else:
+                    main_obj.location = conj_obj.location
+
+                main_lst_json.append(conj_obj.to_json())
+
+            main_lst_json.append(main_obj.to_json())
+    print(sentence)
     return main_lst_json
-    return obj
 
 
 
@@ -185,15 +259,6 @@ def isNumber(feature):
     except:
         return False
 
-action_map = [["fly"],["run"],["walk"]]
-def isAction(feature):
-    if(feature.lemma_ in action_map[0]):
-      return "fly"
-    elif(feature.lemma_ in action_map[1]):
-      return "run"
-    elif(feature.lemma_ in action_map[2]):
-      return "walk"
-
 
 ## Functions to identify what information a feature gives about the object
 size_map = [
@@ -244,9 +309,7 @@ def isPreposition(feature):
         return False
 
 
-action_map = [["fly"], ["run"], ["walk"]]
-
-
+action_map = [["fly","flying"], ["run","running"], ["walk","walking","go","going"]]
 def isAction(feature):
     if (feature.lemma_ in action_map[0]):
         return "fly"
@@ -254,13 +317,20 @@ def isAction(feature):
         return "run"
     elif (feature.lemma_ in action_map[2]):
         return "walk"
+    return False
+
 
 
 def extract_main_object(doc):
     main_lst = [chunk.root for chunk in doc.noun_chunks if
                 chunk.root.dep_ == "ROOT" or chunk.root.dep_ == "nsubj" or chunk.root.dep_ == "attr"]
-    conj_lst = list([main.conjuncts for main in main_lst][0])
-    return main_lst + conj_lst
+    if(not main_lst):
+        try:
+            main_lst = [[token for token in doc if token.pos_ == "NOUN"][0]]
+        except:
+            print("extract_main_object error")
+    return main_lst
+
 
 
 def get_chunks(doc, main_obj_token):
@@ -269,27 +339,35 @@ def get_chunks(doc, main_obj_token):
             return [token for token in chunk if token != main_obj_token]
 
 
+
 # Extract the relevant information of the main object
-# Implement better ->
-def extract_features(doc, main_obj_token):
+def extract_features(doc,obj_token):
     feature_lst = []
-    stack = [ancestor for ancestor in main_obj_token.ancestors]
+    stack = []
+    if(obj_token.ancestors):
+        stack += [ancestor for ancestor in obj_token.ancestors]
+    if(obj_token.children):
+        stack +=  [children for children in obj_token.children]
+   # stack = [ancestor for ancestor in obj_token.ancestors] + [children for children in obj_token.children]
     while stack:
-        print(stack)
         current = stack.pop()
         if (current.pos_ != "NOUN"):
             feature_lst.append(current)
-            stack += [ancestor for ancestor in current.children]
-    feature_lst += (get_chunks(doc, main_obj_token))
+            stack += [children for children in current.children]
     return feature_lst
 
 
 # Creates an "Object" based on the given information
 def match_features(feature_lst, main_obj_token):
     ob = Object(name=main_obj_token.lemma_)
+
+    if (main_obj_token.tag_ == "NNS"):
+        ob.number = random.randint(2, 5)
+
     for feature in feature_lst:
         feature_txt = feature.lemma_
         size = isSize(feature_txt)
+
         if (size):
             ob.size = size
 
@@ -300,14 +378,20 @@ def match_features(feature_lst, main_obj_token):
             number = w2n.word_to_num(feature_txt)
             ob.number = number
 
-        elif (main_obj_token.tag_ == "NNS"):
-            ob.number = random.randint(2, 5)
-
         elif (isPreposition(feature)):
             location = [child.lemma_ for child in feature.children if (child.tag_ == "NN")][0]
             ob.location = {"Preposition": feature.lemma_,
-                            "Location": location}
+                           "Location": location}
         elif (isAction(feature)):
             ob.action = feature.text
+
     return ob
 
+
+
+def process_Story():
+    new_story = []
+    global story
+    for sentence in story:
+        new_story.append(sentence.lower().capitalize()+". ")
+    return new_story

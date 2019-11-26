@@ -8,4 +8,10 @@ urlpatterns = [
     path('record', views.recordAndDraw),
     path('draw_objects', views.draw_objects),
     path('start_demo', views.start_demo),
+    path('test', views.test),
+    path('goLeft', views.goLeft),
+    path('fly', views.fly),
+    path('goRight', views.goRight),
+    path('ascend', views.ascend),
+    path('write_code', views.write_code),
 ]
