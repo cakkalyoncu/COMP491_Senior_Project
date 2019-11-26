@@ -320,7 +320,6 @@ def isAction(feature):
     return False
 
 
-
 def extract_main_object(doc):
     main_lst = [chunk.root for chunk in doc.noun_chunks if
                 chunk.root.dep_ == "ROOT" or chunk.root.dep_ == "nsubj" or chunk.root.dep_ == "attr"]
