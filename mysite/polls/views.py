@@ -85,14 +85,33 @@ def draw_objects(request):
 
 def sentence_processing(sentence):
     doc = nlp(sentence)
+
     main_lst_json = []
     weather = isWeather(doc)
     if (weather):
         main_lst_json.append(Weather(state=weather).to_json())
     else:
         main_lst = extract_main_object(doc)
-        for main_object in main_lst:
-            main_lst_json.append(match_features(extract_features(doc, main_object), main_object).to_json())
+        for main in main_lst:
+            main_obj = match_features(extract_features(doc, main), main)
+            conj_lst = list(main.conjuncts)
+            for conj in conj_lst:
+
+                conj_obj = match_features(extract_features(doc, conj), conj)
+                if (main_obj.action != None):
+                    conj_obj.action = main_obj.action
+                else:
+                    main_obj.action = conj_obj.action
+
+                if (main_obj.location != "random"):
+                    conj_obj.location = main_obj.location
+                else:
+                    main_obj.location = conj_obj.location
+
+                main_lst_json.append(conj_obj.to_json())
+
+            main_lst_json.append(main_obj.to_json())
+    print(sentence)
     return main_lst_json
 
 
@@ -263,14 +282,14 @@ def get_chunks(doc, main_obj_token):
 
 
 # Extract the relevant information of the main object
-def extract_features(doc, main_obj_token):
+def extract_features(doc,obj_token):
     feature_lst = []
     stack = []
-    if(main_obj_token.ancestors):
-        stack += [ancestor for ancestor in main_obj_token.ancestors]
-    if(main_obj_token.children):
-        stack +=  [children for children in main_obj_token.children]
-   # stack = [ancestor for ancestor in main_obj_token.ancestors] + [children for children in main_obj_token.children]
+    if(obj_token.ancestors):
+        stack += [ancestor for ancestor in obj_token.ancestors]
+    if(obj_token.children):
+        stack +=  [children for children in obj_token.children]
+   # stack = [ancestor for ancestor in obj_token.ancestors] + [children for children in obj_token.children]
     while stack:
         current = stack.pop()
         if (current.pos_ != "NOUN"):
@@ -284,16 +303,13 @@ def match_features(feature_lst, main_obj_token):
     ob = Object(name=main_obj_token.lemma_)
 
     if (main_obj_token.tag_ == "NNS"):
-            ob.number = random.randint(2, 5)
+        ob.number = random.randint(2, 5)
 
     for feature in feature_lst:
         feature_txt = feature.lemma_
         size = isSize(feature_txt)
-        action = isAction(feature)
-        if (action):
-            ob.action = action
 
-        elif (size):
+        if (size):
             ob.size = size
 
         elif (isColor(feature_txt)):
@@ -306,6 +322,9 @@ def match_features(feature_lst, main_obj_token):
         elif (isPreposition(feature)):
             location = [child.lemma_ for child in feature.children if (child.tag_ == "NN")][0]
             ob.location = {"Preposition": feature.lemma_,
-                            "Location": location}
+                           "Location": location}
+        elif (isAction(feature)):
+            ob.action = feature.text
+
     return ob
 
