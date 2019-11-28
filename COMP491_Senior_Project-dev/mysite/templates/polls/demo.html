@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+<html>
+<head>
+<title>Speech to Sketch! Demo</title>
+</head>
+<body>
+	
+<h2 class="demotitle"> Speech to Sketch Demo </h2>	
+
+<div style="margin-right: 20%; margin-top: 20px; margin-left: 20%" >
+<p style="font-size:16px"> 
+	Click the record button and say a sentence. The sketcher can draw only one object at once.
+        You can specify the size, color and relative location of the object.</p></div>
+
+<div style="height: 450px;display: table;width: 100%;">
+	<div style="vertical-align: middle;display: table-cell;background-color:#FFEED6;width: 15%;">	
+	
+		{% load static %}
+		<form action='index' method='GET'>
+			<button type="submit" name="button" class="button back"><span class="center"></span></button>		
+		</form>		
+	</div>
+	
+	<div style="left;display: table-cell;background-color:#FFFEFB;width: 70%;" id="sketchholder">
+		{% load staticfiles %}
+        {{ json | json_script:"json" }}
+        {{ error | json_script:"error" }}
+        {{ weather | json_script:"weather" }}
+
+        {%  if obje %}
+                <img  src="{% static obje %}" alt="image">
+        {% else %}
+        <script type="text/javascript" src="{% static "p5.js" %}"></script>
+        <script type="text/javascript" src="{% static "sketch.js" %}"></script>
+        {% endif %}
+	</div>	
+	
+	<div style="vertical-align: middle;left;display: table-cell;width: 15%;background-color:#FFEED6;">
+		<div style="background-color:#FFF7ED;width: 80%;height:60%;margin:auto">
+			<p style="font-size:15px">
+				{{ origin }}
+            {{ sentence }}
+		</div>
+		<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
+			<form action='record' method='GET' style= "display: inline-block;">
+				<button type="submit" name="record" class="button record64"><span class="center"></span></button>
+			</form>
+			<button type="submit" name="button" class="button stop64"><span class="center"></span></button>
+		</div>
+	</div>
+	
+</div>
+	<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
+		<img src="/static/imgs/empty.png"; id='oldpage' width=212 height=90 style= "display:inline-block;">
+		<button type="submit" name="record" class="button plus64" onclick='newPage()'><span class="center"></span></button>
+
+	</div>
+
+</body>
+</html>
