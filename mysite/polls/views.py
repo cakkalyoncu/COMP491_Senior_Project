@@ -32,7 +32,7 @@ def index(request):
     return render(request, 'polls/index.html')
 
 
-def test(request):
+def custom_action(request):
     return render(request, 'polls/readyToDraw.html')
 
 
@@ -57,27 +57,40 @@ def ascend(request):
 
 
 def write_code(request):
+    fiil = request.GET["n"]
+    translate_client = translate.Client()
+    result = translate_client.translate(fiil, target_language="en")
+    verb = result['translatedText']
+    f1 = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/verbs.txt", "a")
+    f1.write(verb )
+    readFile = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml")
+    lines = readFile.readlines()
+    readFile.close()
+    w = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml", 'w')
+    w.writelines([item for item in lines[:-1]])
+    w.close()
     f = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml", "a")
-    f.write("<list>\n")
     for x in code:
         if x == "goRight":
-            f.write("\t<action name = 'goRight'></action>\n")
+            f.write("\t<action name = 'goRight' id = '"+ verb +"'></action>\n")
         elif x == "goLeft":
-            f.write("\t<action name = 'goLeft'></action>\n")
+            f.write("\t<action name = 'goLeft' id = '"+ verb +"'></action>\n")
         elif x == "fly":
-            f.write("\t<action name = 'fly'></action>\n")
+            f.write("\t<action name = 'fly' id = '"+ verb +"'></action>\n")
         elif x == "ascend":
-            f.write("\t<action name = 'ascend'></action>\n")
-    f.write("</list>")
+            f.write("\t<action name = 'ascend' id = '"+ verb +"'></action>\n")
+    f.write("</list>\n")
+
     return render(request, 'polls/readyToDraw.html')
 
 
-def actions():
+def actions(id):
     actions = []
     tree = ET.parse("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml")
     root = tree.getroot()
     for child in root:
-        actions.append(child.attrib["name"])
+        if child.attrib["id"] == id:
+            actions.append(child.attrib["name"])
     return actions
 
 
@@ -97,7 +110,6 @@ def recordAndDraw(request):
     s = process_Story()
     sentence = context["text"]
     obj_list = sentence_processing(sentence)
-    action = actions()
     for m in obj_list:
         obj = json.loads(m)
         if "state" in obj:
@@ -105,6 +117,8 @@ def recordAndDraw(request):
         else:
             name = obj["name"]
             fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
+            print(obj["action"])
+            action = actions(obj["action"])
             if not os.path.exists(fileName):
                 error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
                 return render(request, 'polls/demo.html', {'error': error, 'json': obj_hist})
@@ -116,7 +130,7 @@ def recordAndDraw(request):
             obj["strokeArray"] = y["drawing"]
             obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo.html', {'story': "".join(s), 'sentence': sentence, 'json': obj_hist,
-                                               'weather': weather_state, 'actions': action})
+                                               'weather': weather_state})
 
 
 def start_demo(request):
@@ -282,7 +296,7 @@ weather_map = [["rain", "raining", "rainy"], ["snow", "snowing", "snowy"], ["sun
 def isWeather(doc):
     for token in doc:
         feature_txt = token.lemma_.lower()
-        print("is weather: ", feature_txt)
+        #        print("is weather: ", feature_txt)
         if (feature_txt in weather_map[0]):
             return "rain"
         elif (feature_txt in weather_map[1]):
@@ -312,11 +326,15 @@ def isPreposition(feature):
 action_map = [["fly","flying"], ["run","running"], ["walk","walking","go","going"]]
 def isAction(feature):
     if (feature.lemma_ in action_map[0]):
-        return "fly"
+        return {"Action": "fly", "Custom": False}
     elif (feature.lemma_ in action_map[1]):
-        return "run"
+        return {"Action": "run", "Custom": False}
     elif (feature.lemma_ in action_map[2]):
-        return "walk"
+        return {"Action": "walk", "Custom": False}
+    else:
+        with open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/verbs.txt") as verbs:
+            if feature.lemma_ in verbs.read():
+                return {"Action": actions(feature.lemma_), "Custom": True}
     return False
 
 
@@ -382,8 +400,7 @@ def match_features(feature_lst, main_obj_token):
             ob.location = {"Preposition": feature.lemma_,
                            "Location": location}
         elif (isAction(feature)):
-            ob.action = feature.text
-
+            ob.action = isAction(feature)
     return ob
 
 

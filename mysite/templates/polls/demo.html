@@ -17,19 +17,18 @@
         You can specify the size, color and relative location of the object.</p></div>
 <div style="height: 450px;display: table;width: 100%;">
 	<div style="vertical-align: middle;display: table-cell;background-color:#FFEED6;width: 15%;">	
-	
+
 		{% load static %}
 		<form action='index' method='GET'>
 			<button type="submit" name="button" class="button back"><span class="center"></span></button>		
 		</form>		
 	</div>
-	
+
 	<div style="left;display: table-cell;background-color:#FFFEFB;width: 70%;" id="sketchholder">
 		{% load staticfiles %}
         {{ json | json_script:"json" }}
         {{ error | json_script:"error" }}
         {{ weather | json_script:"weather" }}
-        {{ actions | json_script:"actions" }}
 
         {%  if obje %}
                 <img  src="{% static obje %}" alt="image">

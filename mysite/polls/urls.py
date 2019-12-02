@@ -8,7 +8,7 @@ urlpatterns = [
     path('record', views.recordAndDraw),
     path('draw_objects', views.draw_objects),
     path('start_demo', views.start_demo),
-    path('test', views.test),
+    path('custom_action', views.custom_action),
     path('goLeft', views.goLeft),
     path('fly', views.fly),
     path('goRight', views.goRight),

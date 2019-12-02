@@ -16,6 +16,7 @@ class DrawingObject {
         this.speed = 10;
         this.direction = Math.random() < 0.5;
         this.action = action;
+        this.continue = true;
     }
 
 
@@ -81,16 +82,33 @@ class DrawingObject {
     }
 
     fly() {
-       this.location_Y -= 30;
+        if(this.location_Y >=40 && this.continue){
+            this.location_Y -= 30;
+        }else{
+            this.continue = false;
+        }
     }
-     ascend() {
-       this.location_Y += 30;
+    ascend() {
+        if(this.location_Y<=310 && this.continue){
+            this.location_Y += 30;
+        }else{
+            this.continue = false;
+        }
     }
     goLeft() {
-       this.location_X -= 30;
+        if(this.location_X >= 40 && this.continue){
+            this.location_X -= 30;
+        }else{
+            this.continue = false;
+        }
     }
     goRight() {
-       this.location_X += 30;
+        if(this.location_X <= 910 && this.continue){
+            this.location_X += 30;
+        } else{
+            this.continue = false;
+        }
+
     }
 
     display() {

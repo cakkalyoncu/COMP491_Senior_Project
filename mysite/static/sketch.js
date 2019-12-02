@@ -3,10 +3,12 @@ let pause = false;
 let sky_blue;
 let snowflakes = [];
 let raindrops = [];
+let clouds = [];
 let snow = false;
 let rain = false;
-
-
+let cloudy = false;
+let speed;
+let time;
 function randomIntFromInterval(min, max) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -22,19 +24,17 @@ function findObject(relativeTo){
 
 function getLocation(json_obj){
     let loc = json_obj.location;
-    // alert(json_obj.location);
+    //    alert(json_obj.action);
     if(loc == "random"){
         let x = randomIntFromInterval(300,400);
         let y;
-        if(json_obj.action == null || json_obj.action == undefined || json_obj.action =="walking"){
-//alert("here");
-//alert(json_obj.action);
+        if(json_obj.action == null || json_obj.action == undefined || json_obj.action["Action"] =="walk"){
             y = randomIntFromInterval(300,350);
             if(json_obj.size ==1.5){
                 y = randomIntFromInterval(160,180);
             }
         }else{
-      //      alert(json_obj.action);
+            //      alert(json_obj.action);
             y = randomIntFromInterval(100,130);
         }
 
@@ -88,8 +88,10 @@ let width = 1060;
 let height = 450;
 
 function setup() {
-
+    speed = true;
+    time = 0;
     prepareRain();
+    prepareClouds();
     sky_blue = color(135,206,250);
     let list = JSON.parse(document.getElementById('json').textContent);
 //   alert(list);
@@ -102,16 +104,24 @@ function setup() {
         if(weather=="snow"){
             snow = true;
             rain = false;
+            cloudy = false;
         } else if(weather=="rain"){
             snow = false;
             rain = true;
+            cloudy = false;
         } else if(weather=="sun"){
             snow = false;
             rain = false;
+            cloudy = false;
+        } else if(weather=="cloud"){
+            snow = false;
+            rain = false;
+            cloudy = true;
         }
     }
     for (let i = 0; i< list.length; i++){
         let a = JSON.parse(list[i]);
+        //       alert(a.action);
         //alert(a.name)
 
         //alert(w);
@@ -121,7 +131,7 @@ function setup() {
 
             let w = location[0]+ (m * 120);
             let h = location[1];
-        //    alert(a.name+" : "+ a.number+ " w: "+w);
+            //    alert(a.name+" : "+ a.number+ " w: "+w);
             let obj = new DrawingObject(a.name, a.color, a.size, a.number, w, h, a.strokeArray, a.action);
             obj_array.push(obj);
         }
@@ -248,20 +258,39 @@ function draw() {
     sun();
     //translate(-275, -175);
     //box(85);
-    //  alert(obj.strokeArray)
     if(snow){
         background(sky_blue);
         letItSnow();
     } else if(rain){
         letItRain();
+    } else if(cloudy){
+        drawClouds();
     }
 
     for (let i = 0; i< obj_array.length; i++){
-
-        if(obj_array[i].action != undefined){
-
-            obj_array[i].walk();
+        if(obj_array[i].action != null && obj_array[i].action != undefined && obj_array[i].action != "") {
+            if (obj_array[i].action["Custom"]) {
+                let l = obj_array[i].action["Action"].length;
+                if (obj_array[i].action["Action"][time % l] == "fly") {
+                    obj_array[i].fly();
+                } else if (obj_array[i].action["Action"][time % l] == "ascend") {
+                    obj_array[i].ascend();
+                } else if (obj_array[i].action["Action"][time % l] == "goRight") {
+                    obj_array[i].goRight();
+                } else if (obj_array[i].action["Action"][time % l] == "goLeft") {
+                    obj_array[i].goLeft();
+                }
+                if (speed) {
+                    time += 1;
+                    speed = false;
+                } else {
+                    speed = true;
+                }
+            } else {
+                obj_array[i].walk();
+            }
         }
+
         obj_array[i].display();
 
     }
@@ -282,4 +311,25 @@ function sun() {
     line(a + 60, b+ 55, 170, 150);
     line(a+ 30, b + 80, 100, 200);
     line(a - 10, b + 90, 20, 220);
+}
+function drawClouds(){
+    background(color(173,216,230));
+    ground(color(0,255,0));
+    for(let i = 0; i< clouds.length; i++){
+        cloud(clouds[i].xpos, clouds[i].ypos, clouds[i].size);
+    }
+}
+function prepareClouds(){
+    for(let j = 0; j<15; j++){
+        var newCloud = { xpos: random(10, 1000), ypos: random(50, 110), size: random(1, 3)};
+        clouds.push(newCloud);
+    }
+}
+function cloud(x, y, size) {
+    fill(255, 255, 255);
+    noStroke();
+    arc(x, y, 25 * size, 20 * size, PI + TWO_PI, TWO_PI);
+    arc(x + 10, y, 25 * size, 45 * size, PI + TWO_PI, TWO_PI);
+    arc(x + 25, y, 25 * size, 35 * size, PI + TWO_PI, TWO_PI);
+    arc(x + 40, y, 30 * size, 20 * size, PI + TWO_PI, TWO_PI);
 }
