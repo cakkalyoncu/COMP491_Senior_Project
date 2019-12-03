@@ -1,0 +1,71 @@
+body {background-color: #FFEED6; font-family:verdana}
+
+h1 {color: #2B061E; text-align: center;font-family: Courier;font-size: 60px;margin-top:100px} 
+
+p {font-size:20px}
+
+.demotitle {
+	margin-top:50px;
+	text-align: center;
+	color: #2B061E; 
+	font-family: Courier;
+	font-weight: bold;
+	font-size: 40px}
+
+h3 {text-align: right;}
+
+
+.demo{
+	margin:0 auto;
+    display:block;
+	background:    #4CAF50;
+	border:        1px solid #9d9dcc;
+	border-radius: 5px;
+	box-shadow:    1px 1px #9d9dcc;
+	padding:       8px 20px;
+	color:         #000000;
+	font:          normal bold 24px/1 "Komika", cursive;
+	text-align:    center;
+	}	
+
+.record64{
+	position: relative;
+	display:inline-block;
+	margin: 0px 20px 0px auto;
+	width:64px;
+    height:64px;
+	border:none;
+	background:url("/static/imgs/record64.png")no-repeat;
+}	
+
+.stop64{
+	position: relative;
+	display:inline-block;
+	margin: 0px 20px 0px auto;
+	width:64px;
+    height:64px;
+	border:none;
+	background:url("/static/imgs/stop64.png")no-repeat;
+}	
+	
+.back{
+	position: relative;
+	margin-top:20px;
+	display:inline-block;
+	margin-left:35px;
+	margin-right:30px;
+	width:128px;
+    height:80px;
+	border:none;
+	background:url("/static/imgs/return.png")no-repeat;
+}
+
+.plus64{
+	position: relative;
+	display:inline-block;
+	margin-bottom:20px;
+	width:64px;
+    height:90px;
+	border:none;
+	background:url("/static/imgs/plus64.png")no-repeat;
+}

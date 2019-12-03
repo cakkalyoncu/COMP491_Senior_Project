@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">		
+    <title>Speech to Sketch!</title>
+	
+	{% load staticfiles %}
+        {{ object | json_script:"object" }}
+        <script type="text/javascript" src="{% static "p5.js" %}"></script>
+        <script type="text/javascript" src="{% static "sketch.js" %}"></script>		
+  </head>
+  
+  <body>
+  
+	<h1> Speech to Sketch </h1>
+
+	<div style="margin-right: 20%; margin-bottom: 15%; margin-left: 20%;">
+	<p> This is a speech to sketch interface. Click demo button to try or project button to read about the project.</p></div>
+  
+	<form action='start_demo' method='GET'>
+       <div style="text-align: center;"> <button type="submit" class="demo" >Try the Demo</button></div>
+      </form>
+    <p></p>
+  <form action='info' method='GET'>
+       <div style="text-align: center;"> <button type="submit" class="demo" >Learn About Project</button></div>
+      </form>
+      <p></p>
+  <form action='custom_action' method='GET'>
+       <div style="text-align: center;"> <button type="submit" class="demo" >Add Your Own Actions</button></div>
+      </form>
+  </body>
+  
+  
+</html>
+
+	
+	
+	{% load staticfiles %}
+        {{ object | json_script:"object" }}
+        <script type="text/javascript" src="{% static "p5.js" %}"></script>
+        <script type="text/javascript" src="{% static "sketch.js" %}"></script>
