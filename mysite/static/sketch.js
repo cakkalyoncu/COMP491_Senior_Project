@@ -7,6 +7,7 @@ let clouds = [];
 let snow = false;
 let rain = false;
 let cloudy = false;
+var image = new Image();
 let speed;
 let time;
 function randomIntFromInterval(min, max) { // min and max included
@@ -142,6 +143,20 @@ function setup() {
     var canvas = createCanvas(width,height);
     canvas.parent("sketchholder");
     frameRate(20);
+}
+
+function newPage() {
+    obj_array = [];
+
+    output=get(0,0,1060,450);
+    output.save('output.png')
+
+	image.src = canvas.toDataURL("image/png");
+    document.getElementById('oldpage').src=image.src;
+
+    canvas.clear();
+
+
 }
 
 function letItSnow(){
