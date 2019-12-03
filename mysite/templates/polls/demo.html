@@ -34,22 +34,32 @@
                 <img  src="{% static obje %}" alt="image">
         {% else %}
         <script type="text/javascript" src="{% static "p5.js" %}"></script>
-            <script type="text/javascript" src="{% static "object.js" %}"></script>
         <script type="text/javascript" src="{% static "sketch.js" %}"></script>
         {% endif %}
 	</div>	
 	
 	<div style="vertical-align: middle;left;display: table-cell;width: 15%;background-color:#FFEED6;">
-
-		<form action='record' method='GET'>
-            <button type="submit" name="record" class="button record64"><span class="center"></span></button>
-        </form>
-
-		<button type="submit" name="button" class="button stop64"><span class="center"></span></button>
+		<div style="background-color:#FFF7ED;width: 80%;height:60%;margin:auto">
+			<p style="font-size:15px">
+				{{ origin }}
+            {{ sentence }}
+		</div>
+		<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
+			<form action='record' method='GET' style= "display: inline-block;">
+				<button type="submit" name="record" class="button record64"><span class="center"></span></button>
+			</form>
+			<button type="submit" name="button" class="button stop64"><span class="center"></span></button>
+		</div>
 	</div>
+	
 </div>
 <h2 class="demotitle"> Your Story </h2>
 <div style="vertical-align: center; display: table-cell;width: 15%;background-color:#FFEED6;">
+	<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
+		<img src="/static/imgs/empty.png"; id='oldpage' width=212 height=90 style= "display:inline-block;">
+		<button type="submit" name="record" class="button plus64" onclick='newPage()'><span class="center"></span></button>
+
+	</div>
 <div style="background-color:#FFF7ED;width: 80%;height:60%;margin:auto"> {{ story }}</div>
 </div>
 
