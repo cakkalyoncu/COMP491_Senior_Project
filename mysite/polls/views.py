@@ -314,13 +314,14 @@ prep_map = [["on", "above", "over", "up"], ["beneath", "below", "down", "under",
 
 
 def isPreposition(feature):
-    if (feature.dep_ == "prep"):
+    """if (feature.dep_ == "prep"):
         if (feature.lemma_ in prep_map[0]):
             return "on"
         elif (feature.lemma_ in prep_map[1]):
             return "under"
     else:
-        return False
+        return False"""
+    return feature.dep_ == "prep"
 
 
 action_map = [["fly","flying"], ["run","running"], ["walk","walking","go","going"]]
