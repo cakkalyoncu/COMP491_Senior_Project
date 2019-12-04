@@ -22,8 +22,10 @@ obj_hist = []
 weather_state = "sun"
 code = []
 story = []
+story_hist =[]
 
 def index(request):
+    story_hist.clear()
     obj_hist.clear()
     code.clear()
     story.clear()
@@ -130,11 +132,21 @@ def recordAndDraw(request):
             obj["strokeArray"] = y["drawing"]
             obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo.html', {'story': "".join(s), 'sentence': sentence, 'json': obj_hist,
-                                               'weather': weather_state})
+                                               'weather': weather_state, 'story_hist': story_hist})
 
 
 def start_demo(request):
     return render(request, 'polls/demo.html')
+
+
+def save_page(request):
+    obj_hist.clear()
+    s = process_Story()
+    s1 = "".join(s)
+    size = len(story_hist)
+    story_hist.append({"story": s1, "file": str(size)+".png"})
+    story.clear()
+    return render(request, 'polls/demo.html', {'story_hist': story_hist, 'weather': weather_state, 'var': "output.png"})
 
 
 def draw_objects(request):

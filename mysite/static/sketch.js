@@ -10,6 +10,8 @@ let cloudy = false;
 var image = new Image();
 let speed;
 let time;
+let canvas;
+let memory;
 function randomIntFromInterval(min, max) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -89,6 +91,7 @@ let width = 1060;
 let height = 450;
 
 function setup() {
+    memory =0;
     speed = true;
     time = 0;
     prepareRain();
@@ -125,7 +128,7 @@ function setup() {
         //       alert(a.action);
         //alert(a.name)
 
-        //alert(w);
+
         //alert(h);
         let location = getLocation(a);
         for(let m =0; m< a.number; m++){
@@ -139,16 +142,14 @@ function setup() {
 
         time =0;
     }
-
-    var canvas = createCanvas(width,height);
+    canvas = createCanvas(width,height);
     canvas.parent("sketchholder");
     frameRate(20);
 }
 
 function newPage() {
-    obj_array = [];
 
-    output=get(0,0,1060,450);
+    let output = get(0,0,1060,450);
     output.save('output.png')
 
 	image.src = canvas.toDataURL("image/png");
