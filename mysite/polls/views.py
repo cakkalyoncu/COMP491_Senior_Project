@@ -210,13 +210,14 @@ def record():
 
 
 class Object:
-    def __init__(self, name, color="black", size=1, number=1, location="random", action=None):
+    def __init__(self, name, color="black", size=1, number=1, location="random", action=None, prev = False):
         self.name = name
         self.color = color
         self.size = size
         self.number = number
         self.location = location
         self.action = action
+        self.prev = prev
         self.strokeArray = []
 
     def print(self):
@@ -238,7 +239,7 @@ class Weather:
         return json.dumps(self.__dict__)
 
 class Object2:
-    def __init__(self, name, color="black", size=1, number=1, location="random"):
+    def __init__(self, name, color="black", size=1, number=1, location="random", prev = False):
         self.name = name
         self.color = color
         self.size = size
@@ -246,6 +247,7 @@ class Object2:
         self.location = location
         self.strokeArray = []
         self.id = 0
+        self.prev = prev
 
     def print(self):
         print("Name: ", self.name, "\tColor:", self.color, " Size:", self.size, " Number:", self.number, " Location:",
@@ -385,8 +387,10 @@ def match_features(feature_lst, main_obj_token):
     for feature in feature_lst:
         feature_txt = feature.lemma_
         size = isSize(feature_txt)
+        if (feature_txt == "the"):
+            ob.prev = True
 
-        if (size):
+        elif (size):
             ob.size = size
 
         elif (isColor(feature_txt)):
@@ -402,6 +406,7 @@ def match_features(feature_lst, main_obj_token):
                            "Location": location}
         elif (isAction(feature)):
             ob.action = isAction(feature)
+
     return ob
 
 
