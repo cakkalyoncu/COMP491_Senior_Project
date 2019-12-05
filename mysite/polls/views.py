@@ -1,4 +1,3 @@
-from typing import List, Any
 
 from django.shortcuts import render
 import speech_recognition as sr
@@ -14,10 +13,11 @@ import json
 import random
 from google.cloud import translate_v2 as translate
 import os
+from django.core.files.storage import FileSystemStorage
 import xml.etree.ElementTree as ET
 
 
-museum_items = ["ship", "carriage"]
+museum_items = {}
 obj_hist = []
 weather_state = "sun"
 code = []
@@ -76,15 +76,15 @@ def write_code(request):
     translate_client = translate.Client()
     result = translate_client.translate(fiil, target_language="en")
     verb = result['translatedText']
-    f1 = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/verbs.txt", "a")
-    f1.write(verb )
-    readFile = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml")
+    f1 = open("static/test.xml", "a")
+    f1.write(verb)
+    readFile = open("static/test.xml")
     lines = readFile.readlines()
     readFile.close()
-    w = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml", 'w')
+    w = open("static/test.xml", 'w')
     w.writelines([item for item in lines[:-1]])
     w.close()
-    f = open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml", "a")
+    f = open("static/test.xml", "a")
     for x in code:
         if x == "goRight":
             f.write("\t<action name = 'goRight' id = '"+ verb +"'></action>\n")
@@ -101,7 +101,7 @@ def write_code(request):
 
 def actions(id):
     actions = []
-    tree = ET.parse("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/test.xml")
+    tree = ET.parse("static/test.xml")
     root = tree.getroot()
     for child in root:
         if child.attrib["id"] == id:
@@ -133,22 +133,24 @@ def recordAndDraw(request):
         if "state" in obj:
             weather_state = obj["state"]
         else:
-                name = obj["name"]
-                fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
-                print(obj["action"])
-                action = actions(obj["action"])
-                if not os.path.exists(fileName):
-                    error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
-                    return render(request, 'polls/demo.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
-                f = open(fileName, "r")
-                qdImages = f.read()
-                p = re.findall(r'{(.*?)}', qdImages)
-                i = random.randrange(0, len(p), 1)
-                y = json.loads("{" + p[i] + "}")
-                obj["strokeArray"] = y["drawing"]
-                obj_hist.append(json.dumps(obj))
+
+            name = obj["name"]
+            fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
+            print(obj["action"])
+            action = actions(obj["action"])
+            if not os.path.exists(fileName):
+                error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
+                return render(request, 'polls/demo.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
+
+            f = open(fileName, "r")
+            qdImages = f.read()
+            p = re.findall(r'{(.*?)}', qdImages)
+            i = random.randrange(0, len(p), 1)
+            y = json.loads("{" + p[i] + "}")
+            obj["strokeArray"] = y["drawing"]
+            obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo.html', {'story': "".join(s), 'sentence': sentence, 'json': obj_hist,
-                                               'weather': weather_state})
+                                           'weather': weather_state})
 
 
 def recordAndDraw_en(request):
@@ -190,7 +192,7 @@ def recordAndDraw_en(request):
                 obj["strokeArray"] = y["drawing"]
                 obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo_en.html', {'story': "".join(s), 'sentence': cumle, 'json': obj_hist,
-                                               'weather': weather_state})
+                                                  'weather': weather_state})
 
 
 def find_defined_object(obj):
@@ -200,6 +202,19 @@ def find_defined_object(obj):
             if obj_hist[object_ind]["name"] == obj.name:
                 return object_ind
     return -1
+
+
+def upload(request):
+    context = {}
+    if request.method == 'POST':
+        uploaded_image = request.FILES['file_image']
+        fs = FileSystemStorage()
+        item_name, extension = uploaded_image.name.split(".", 1)
+        museum_items[item_name] = extension
+        name = fs.save(uploaded_image.name, uploaded_image)
+        url = fs.url(name)
+        context['url'] = fs.url(name)
+    return render(request, 'polls/upload.html', context)
 
 
 def start_demo(request):
@@ -222,7 +237,7 @@ def save_page(request):
 def draw_objects(request):
     name = "tree"
     draw = []
-    fileName = "/Users/apple/Desktop/dataset/" + name + ".ndjson"
+    fileName = "E:\dataset\simplified\\" + name + ".ndjson"
     f = open(fileName, "r")
     qdImages = f.read()
     p = re.findall(r'{(.*?)}', qdImages)
@@ -267,7 +282,6 @@ def sentence_processing(sentence):
     return main_lst_json
 
 
-
 def record():
     r = sr.Recognizer()
     text = ""
@@ -307,17 +321,28 @@ def record_en():
     return context
 
 
+class ImageObject:
+    def __init__(self, name, file_path, size=1,location="random", action=None):
+        self.name = name
+        self.file_path = file_path
+        self.size = size
+        self.location = location
+        self.action = action
+
+    def to_json(self):
+        return json.dumps(self.__dict__)
+
 
 class Object:
-    def __init__(self, name, color="black", size=1, number=1, location="random", action=None, prev = False):
+    def __init__(self, name, color="black", size=1, number=1, location="random", action=None, file_path = None,):
         self.name = name
         self.color = color
         self.size = size
         self.number = number
         self.location = location
         self.action = action
-        self.prev = prev
         self.strokeArray = []
+        self.file_path = file_path
 
     def print(self):
         print("Name: ", self.name, "\tColor:", self.color, " Size:", self.size, " Number:", self.number, " Location:",
@@ -338,7 +363,7 @@ class Weather:
         return json.dumps(self.__dict__)
 
 class Object2:
-    def __init__(self, name, color="black", size=1, number=1, location="random", prev = False):
+    def __init__(self, name, color="black", size=1, number=1, location="random"):
         self.name = name
         self.color = color
         self.size = size
@@ -346,7 +371,6 @@ class Object2:
         self.location = location
         self.strokeArray = []
         self.id = 0
-        self.prev = prev
 
     def print(self):
         print("Name: ", self.name, "\tColor:", self.color, " Size:", self.size, " Number:", self.number, " Location:",
@@ -391,7 +415,7 @@ def isSize(feature_txt):
         return False
 
 weather_map = [["rain", "raining", "rainy"], ["snow", "snowing", "snowy"], ["sun", "sunny", "sunning:)"],
-                   ["cloudy"], ["weather"]]
+               ["cloudy"], ["weather"]]
 
 
 def isWeather(doc):
@@ -422,7 +446,7 @@ def isPreposition(feature):
             return "under"
     else:
         return False
-    #return feature.dep_ == "prep"
+
 
 
 action_map = [["fly","flying"], ["run","running"], ["walk","walking","go","going"]]
@@ -434,7 +458,7 @@ def isAction(feature):
     elif (feature.lemma_ in action_map[2]):
         return {"Action": "walk", "Custom": False}
     else:
-        with open("/Users/apple/Desktop/comp491/COMP491_Senior_Project/mysite/static/verbs.txt") as verbs:
+        with open("static/verbs.txt") as verbs:
             if feature.lemma_ in verbs.read():
                 return {"Action": actions(feature.lemma_), "Custom": True}
     return False
@@ -467,7 +491,7 @@ def extract_features(doc,obj_token):
         stack += [ancestor for ancestor in obj_token.ancestors]
     if(obj_token.children):
         stack +=  [children for children in obj_token.children]
-   # stack = [ancestor for ancestor in obj_token.ancestors] + [children for children in obj_token.children]
+    # stack = [ancestor for ancestor in obj_token.ancestors] + [children for children in obj_token.children]
     while stack:
         current = stack.pop()
         if (current.pos_ != "NOUN"):
@@ -482,14 +506,11 @@ def match_features(feature_lst, main_obj_token):
 
     if (main_obj_token.tag_ == "NNS"):
         ob.number = random.randint(2, 5)
-
     for feature in feature_lst:
         feature_txt = feature.lemma_
         size = isSize(feature_txt)
-        if (feature_txt == "the"):
-            ob.prev = True
 
-        elif (size):
+        if (size):
             ob.size = size
 
         elif (isColor(feature_txt)):
@@ -505,7 +526,6 @@ def match_features(feature_lst, main_obj_token):
                            "Location": location}
         elif (isAction(feature)):
             ob.action = isAction(feature)
-
     return ob
 
 
