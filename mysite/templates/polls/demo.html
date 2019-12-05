@@ -16,24 +16,27 @@
 	Click the record button and say a sentence. The sketcher can draw only one object at once.
         You can specify the size, color and relative location of the object.</p></div>
 <div style="height: 450px;display: table;width: 100%;">
-	<div style="vertical-align: middle;display: table-cell;background-color:#FFEED6;width: 15%;">	
-
-		{% load static %}
-		<form action='index' method='GET'>
-			<button type="submit" name="button" class="button back"><span class="center"></span></button>		
-		</form>		
+	<div style="vertical-align: middle;display: table-cell;background-color:#FFEED6;width: 15%;">
+        <div>
+            {% load static %}
+            <form action='index' method='GET'>
+                <button type="submit" name="button" class="button back"><span class="center"></span></button>
+            </form>
+        </div>
 	</div>
-	<div style="left;display: table-cell;background-color:#FFFEFB;width: 70%;" id="sketchholder">
+
+	<div style="left; display: table-cell;background-color:#FFFEFB;width: 70%;" id="sketchholder">
 		{% load staticfiles %}
         {{ json | json_script:"json" }}
         {{ error | json_script:"error" }}
         {{ weather | json_script:"weather" }}
 
+
         <script type="text/javascript" src="{% static "object.js" %}"></script>
         <script type="text/javascript" src="{% static "p5.js" %}"></script>
         <script type="text/javascript" src="{% static "sketch.js" %}"></script>
 	</div>	
-	
+
 	<div style="vertical-align: middle;left;display: table-cell;width: 15%;background-color:#FFEED6;">
 		<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
 			<form action='record' method='GET' style= "display: inline-block;">
@@ -42,7 +45,7 @@
 			<button type="submit" name="button" class="button stop64"><span class="center"></span></button>
 		</div>
 	</div>
-	
+
 </div>
 <h2 contenteditable="true" class="demotitle"> Your Story </h2>
 <div style="vertical-align: center; display: table-cell;width: 15%;background-color:#FFEED6;">
