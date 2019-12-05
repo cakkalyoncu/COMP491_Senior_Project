@@ -95,7 +95,16 @@ function ground(color){
 let width = 1060;
 let height = 450;
 
-function setup() {
+function setup() {	
+    if(window.localStorage.getItem("pagecount")== null){
+        localStorage.setItem("pagecount", "0");
+    }
+    if (parseInt(window.localStorage.getItem("pagecount"),10)>=1){
+        let pages=parseInt(window.localStorage.getItem("pagecount"),10);
+        for(let i=0;i<pages;i++){
+            document.getElementById("p"+i).src=localStorage.getItem("p"+i);
+        }
+    }
     memory =0;
     speed = true;
     time = 0;
@@ -161,15 +170,12 @@ function setup() {
 }
 
 function newPage() {
-
-
-    let output = get(0,0,1060,450);
-    output.save('output.png')
-
-
-	image.src = canvas.toDataURL("image/png");
-    document.getElementById('oldpage').src=image.src;
-
+    image.src = canvas.toDataURL("image/png");
+    let pc= parseInt(window.localStorage.getItem("pagecount"),10);
+    let imgstring="p"+pc+"";
+    localStorage.setItem(imgstring, image.src);
+    let newcount=pc+1;
+    localStorage.setItem("pagecount", newcount);
     canvas.clear();
 }
 
