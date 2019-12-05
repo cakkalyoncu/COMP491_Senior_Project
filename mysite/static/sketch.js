@@ -10,6 +10,7 @@ let cloudy = false;
 var image = new Image();
 let speed;
 let time;
+
 function randomIntFromInterval(min, max) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -123,21 +124,28 @@ function setup() {
     for (let i = 0; i< list.length; i++){
         let a = JSON.parse(list[i]);
         //       alert(a.action);
-        //alert(a.name)
 
-        //alert(w);
-        //alert(h);
         let location = getLocation(a);
         for(let m =0; m< a.number; m++){
 
             let w = location[0]+ (m * 120);
             let h = location[1];
             //    alert(a.name+" : "+ a.number+ " w: "+w);
-            let obj = new DrawingObject(a.name, a.color, a.size, a.number, w, h, a.strokeArray, a.action);
+            //let obj = new DrawingObject(a.name, a.color, a.size, a.number, w, h, a.strokeArray, a.action);
+            //alert(a.file_path);
+            let obj;
+            if(a.file_path == null || a.file_path == undefined){
+                alert("drawing obj");
+                obj = new DrawingObject(a.name, a.color, a.size, a.number, w, h, a.strokeArray, a.action);
+            }else{
+                alert("image obj")
+                obj = new ImageObject(a.name, a.size, a.number, w, h, a.file_path, a.action);
+            }
+
             obj_array.push(obj);
         }
 
-        time =0;
+        time=0;
     }
 
     var canvas = createCanvas(width,height);
@@ -149,14 +157,12 @@ function newPage() {
     obj_array = [];
 
     output=get(0,0,1060,450);
-    output.save('output.png')
+    output.save('output.png');
 
 	image.src = canvas.toDataURL("image/png");
     document.getElementById('oldpage').src=image.src;
 
     canvas.clear();
-
-
 }
 
 function letItSnow(){
@@ -183,10 +189,6 @@ function letItRain() {
         raindrops[i].splash();
     }
 }
-
-
-
-
 
 class snowflake {
     constructor(){
@@ -267,6 +269,7 @@ function Rain(x, y) {
     }
 }
 
+
 function draw() {
     background(sky_blue);
     ground(color(0,255,0));
@@ -282,7 +285,7 @@ function draw() {
         drawClouds();
     }
 
-    for (let i = 0; i< obj_array.length; i++){
+    for (let i = 0; i< obj_array.length; i++)   {
         if(obj_array[i].action != null && obj_array[i].action != undefined && obj_array[i].action != "") {
             if (obj_array[i].action["Custom"]) {
                 let l = obj_array[i].action["Action"].length;
@@ -305,7 +308,7 @@ function draw() {
                 obj_array[i].walk();
             }
         }
-
+        //alert(obj_array[i].name);
         obj_array[i].display();
 
     }
