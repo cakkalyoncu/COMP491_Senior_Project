@@ -17,4 +17,5 @@ urlpatterns = [
     path('goRight', views.goRight),
     path('ascend', views.ascend),
     path('write_code', views.write_code),
+    path('save_page', views.save_page),
 ]

@@ -115,26 +115,42 @@ def recordAndDraw(request):
         if "state" in obj:
             weather_state = obj["state"]
         else:
-            name = obj["name"]
-            fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
-            print(obj["action"])
-            action = actions(obj["action"])
-            if not os.path.exists(fileName):
-                error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
-                return render(request, 'polls/demo.html', {'error': error, 'json': obj_hist})
-            f = open(fileName, "r")
-            qdImages = f.read()
-            p = re.findall(r'{(.*?)}', qdImages)
-            i = random.randrange(0, len(p), 1)
-            y = json.loads("{" + p[i] + "}")
-            obj["strokeArray"] = y["drawing"]
-            obj_hist.append(json.dumps(obj))
+            defined_obj_ind = find_defined_object(obj["name"])
+            if(defined_obj_ind>=0):
+                obj_hist[defined_obj_ind]["location"] = obj.location
+                obj_hist[defined_obj_ind]["action"] = obj.action
+                
+            else:
+                name = obj["name"]
+                if(obj["prev"])
+                fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
+                print(obj["action"])
+                action = actions(obj["action"])
+                if not os.path.exists(fileName):
+                    error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
+                    return render(request, 'polls/demo.html', {'error': error, 'json': obj_hist})
+                f = open(fileName, "r")
+                qdImages = f.read()
+                p = re.findall(r'{(.*?)}', qdImages)
+                i = random.randrange(0, len(p), 1)
+                y = json.loads("{" + p[i] + "}")
+                obj["strokeArray"] = y["drawing"]
+                obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo.html', {'story': "".join(s), 'sentence': sentence, 'json': obj_hist,
                                                'weather': weather_state})
 
+def find_defined_object(obj_name):
+    for object_ind in range(0,len(obj_hist)):
+        if obj_hist[object_ind]["name"]==obj_name:
+            return object_ind
+    return -1
 
 def start_demo(request):
     return render(request, 'polls/demo.html')
+
+
+def start_demo_en(request):
+    return render(request, 'polls/demo_en.html')
 
 
 def draw_objects(request):
@@ -210,13 +226,14 @@ def record():
 
 
 class Object:
-    def __init__(self, name, color="black", size=1, number=1, location="random", action=None):
+    def __init__(self, name, color="black", size=1, number=1, location="random", action=None, prev = False):
         self.name = name
         self.color = color
         self.size = size
         self.number = number
         self.location = location
         self.action = action
+        self.prev  = prev
         self.strokeArray = []
 
     def print(self):
