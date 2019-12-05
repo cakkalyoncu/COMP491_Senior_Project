@@ -42,28 +42,33 @@
 			<form action='record' method='GET' style= "display: inline-block;">
 				<button type="submit" name="record" class="button record64"><span class="center"></span></button>
 			</form>
-			<button type="submit" name="button" class="button stop64"><span class="center"></span></button>
 		</div>
 	</div>
-
 </div>
-<h2 contenteditable="true" class="demotitle"> Hikayeniz </h2>
+
 <div style="vertical-align: center; display: table-cell;width: 15%;background-color:#FFEED6;">
 	<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
         <form action='save_page' method='GET' style= "display: inline-block;">
 		<button type="submit" name="record" class="button plus64" onclick='newPage()'><span class="center"></span></button>
         </form>
 	</div>
+	
+	<h2 contenteditable="true" class="demotitle"> Hikayeniz </h2>
+	
+	<div style="background-color:#FFF7ED;width: 80%;height:60%;vertical-align: middle;margin-bottom:10px;margin-left:10%"> {{ story }}</div>
 
-    {% for story in story_hist %}
-        {{ story.story }}
-        {% if var %}
-            <p></p>
-            <img  src="{% static story.file  %}" alt="image">
-            <p></p>
-        {% endif %}
-    {% endfor %}
-<div style="background-color:#FFF7ED;width: 80%;height:60%;margin:auto"> {{ story }}</div>
+    <img id="p0" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p1" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p2" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p3" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p4" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p5" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p6" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p7" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p8" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	<img id="p9" alt="image" src="/static/imgs/empty.png" width=33% height=25%>
+	
+
 </div>
 
 </body>
