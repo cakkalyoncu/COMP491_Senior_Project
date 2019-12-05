@@ -15,7 +15,7 @@ from google.cloud import translate_v2 as translate
 import os
 from django.core.files.storage import FileSystemStorage
 import xml.etree.ElementTree as ET
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "D:\hey.json"
+
 
 museum_items = {}
 obj_hist = []
