@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">		
-    <title>Hikaye Çizim Arayüzü!</title>
+    <title>Speech to Sketch!</title>
 	
 	{% load staticfiles %}
         {{ object | json_script:"object" }}
@@ -17,25 +17,25 @@
   </head>
   
   <body>
-  <form action='index_en' method='GET'>
-       <div style="text-align: center;"> <button type="submit" class="demo" >English</button></div>
+  <form action='index' method='GET'>
+       <div style="text-align: center;"> <button type="submit" class="demo" >Turkish</button></div>
       </form>
   
-	<h1> Hikaye Çizim Arayüzü </h1>
+	<h1> Speech to Sketch </h1>
 
 	<div style="margin-right: 20%; margin-bottom: 15%; margin-left: 20%;">
-	<p> Bu bir hikaye çizim arayüzü. Denemek için, projeyle ilgili bilgi almak için veya size özel hareket ve obje eklemek için ilgili butonlara tıklayın. </p></div>
+	<p> This is a speech to sketch interface. Click demo button to try or project button to read about the project.</p></div>
   
-	<form action='start_demo' method='GET'>
-       <div style="text-align: center;"> <button type="submit" class="demo" >Projeyi deneyin</button></div>
+	<form action='start_demo_en' method='GET'>
+       <div style="text-align: center;"> <button type="submit" class="demo" >Try the Demo</button></div>
       </form>
     <p></p>
-  <form action='info' method='GET'>
-       <div style="text-align: center;"> <button type="submit" class="demo" >Projeyle ilgili bilgi alın</button></div>
+  <form action='show_info_en' method='GET'>
+       <div style="text-align: center;"> <button type="submit" class="demo" >Learn About Project</button></div>
       </form>
       <p></p>
-  <form action='custom_action' method='GET'>
-       <div style="text-align: center;"> <button type="submit" class="demo" >Kendi hareketlerinizi tanımlayın</button></div>
+  <form action='custom_action_en' method='GET'>
+       <div style="text-align: center;"> <button type="submit" class="demo" >Add Your Own Actions</button></div>
       </form>
   </body>
   

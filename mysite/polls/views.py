@@ -24,6 +24,7 @@ code = []
 story = []
 story_hist =[]
 
+
 def index(request):
     story_hist.clear()
     obj_hist.clear()
@@ -33,9 +34,21 @@ def index(request):
     weather_state = "sun"
     return render(request, 'polls/index.html')
 
+def index_en(request):
+    story_hist.clear()
+    obj_hist.clear()
+    code.clear()
+    story.clear()
+    global weather_state
+    weather_state = "sun"
+    return render(request, 'polls/index_en.html')
+
 
 def custom_action(request):
     return render(request, 'polls/readyToDraw.html')
+
+def custom_action_en(request):
+    return render(request, 'polls/readyToDraw_en.html')
 
 
 def goLeft(request):
@@ -99,6 +112,9 @@ def actions(id):
 def show_info(request):
     return render(request, 'polls/doc.html')
 
+def show_info_en(request):
+    return render(request, 'polls/doc_en.html')
+
 
 def create_new_canvas(request):
     return HttpResponse("Started recording")
@@ -117,26 +133,80 @@ def recordAndDraw(request):
         if "state" in obj:
             weather_state = obj["state"]
         else:
-            name = obj["name"]
-            fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
-            print(obj["action"])
-            action = actions(obj["action"])
-            if not os.path.exists(fileName):
-                error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
-                return render(request, 'polls/demo.html', {'error': error, 'json': obj_hist})
-            f = open(fileName, "r")
-            qdImages = f.read()
-            p = re.findall(r'{(.*?)}', qdImages)
-            i = random.randrange(0, len(p), 1)
-            y = json.loads("{" + p[i] + "}")
-            obj["strokeArray"] = y["drawing"]
-            obj_hist.append(json.dumps(obj))
+                name = obj["name"]
+                fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
+                print(obj["action"])
+                action = actions(obj["action"])
+                if not os.path.exists(fileName):
+                    error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
+                    return render(request, 'polls/demo.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
+                f = open(fileName, "r")
+                qdImages = f.read()
+                p = re.findall(r'{(.*?)}', qdImages)
+                i = random.randrange(0, len(p), 1)
+                y = json.loads("{" + p[i] + "}")
+                obj["strokeArray"] = y["drawing"]
+                obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo.html', {'story': "".join(s), 'sentence': sentence, 'json': obj_hist,
-                                               'weather': weather_state, 'story_hist': story_hist})
+                                               'weather': weather_state})
+
+
+def recordAndDraw_en(request):
+    global weather_state
+    context = record_en()
+    cumle = context["origin"]
+    story.append(cumle)
+    s = process_Story()
+    obj_list = sentence_processing(cumle)
+    for m in obj_list:
+        obj = json.loads(m)
+        if "state" in obj:
+            weather_state = obj["state"]
+        else:
+            defined_obj_ind = -1
+            if (obj["prev"]):
+                for object_ind in range(0, len(obj_hist)):
+                    a = json.loads(obj_hist[object_ind])
+                    if a["name"] == obj["name"]:
+                        defined_obj_ind = object_ind
+                        a["location"] = obj["location"]
+                        a["action"] = obj["action"]
+                        obj_hist[defined_obj_ind] = json.dumps(a)
+
+            if(defined_obj_ind == -1):
+
+                name = obj["name"]
+                fileName = "/Users/apple/Downloads/filtereddataset/" + name + ".ndjson"
+                print(obj["action"])
+                action = actions(obj["action"])
+                if not os.path.exists(fileName):
+                    error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
+                    return render(request, 'polls/demo_en.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
+                f = open(fileName, "r")
+                qdImages = f.read()
+                p = re.findall(r'{(.*?)}', qdImages)
+                i = random.randrange(0, len(p), 1)
+                y = json.loads("{" + p[i] + "}")
+                obj["strokeArray"] = y["drawing"]
+                obj_hist.append(json.dumps(obj))
+    return render(request, 'polls/demo_en.html', {'story': "".join(s), 'sentence': cumle, 'json': obj_hist,
+                                               'weather': weather_state})
+
+
+def find_defined_object(obj):
+    print(obj);
+    if(obj.prev):
+        for object_ind in range(0, len(obj_hist)):
+            if obj_hist[object_ind]["name"] == obj.name:
+                return object_ind
+    return -1
 
 
 def start_demo(request):
     return render(request, 'polls/demo.html')
+
+def start_demo_en(request):
+    return render(request, 'polls/demo_en.html')
 
 
 def save_page(request):
@@ -217,6 +287,23 @@ def record():
     except sr.RequestError as e:
         text = "Could not request results from Google Speech Recognition service; {0}".format(e)
     context = {'origin': sentence, 'text': translated, 'error': text}
+    return context
+
+
+def record_en():
+    r = sr.Recognizer()
+    text = ""
+    translated = ""
+    with sr.Microphone() as source:
+        # r.adjust_for_ambient_noise(source)
+        audio = r.listen(source)
+    try:
+        sentence = r.recognize_google(audio, language="en-EN")
+    except sr.UnknownValueError:
+        text = "Google Speech Recognition could not understand audio"
+    except sr.RequestError as e:
+        text = "Could not request results from Google Speech Recognition service; {0}".format(e)
+    context = {'origin': sentence, 'error': text}
     return context
 
 
@@ -328,14 +415,14 @@ prep_map = [["on", "above", "over", "up"], ["beneath", "below", "down", "under",
 
 
 def isPreposition(feature):
-    """if (feature.dep_ == "prep"):
+    if (feature.dep_ == "prep"):
         if (feature.lemma_ in prep_map[0]):
             return "on"
         elif (feature.lemma_ in prep_map[1]):
             return "under"
     else:
-        return False"""
-    return feature.dep_ == "prep"
+        return False
+    #return feature.dep_ == "prep"
 
 
 action_map = [["fly","flying"], ["run","running"], ["walk","walking","go","going"]]
@@ -413,7 +500,7 @@ def match_features(feature_lst, main_obj_token):
             ob.number = number
 
         elif (isPreposition(feature)):
-            location = [child.lemma_ for child in feature.children if (child.tag_ == "NN")][0]
+            location = [child.lemma_ for child in feature.children if ((child.tag_ == "NN") or (child.tag_ == "NNS"))][0]
             ob.location = {"Preposition": feature.lemma_,
                            "Location": location}
         elif (isAction(feature)):

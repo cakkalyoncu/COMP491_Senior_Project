@@ -15,4 +15,9 @@ urlpatterns = [
     path('ascend', views.ascend),
     path('write_code', views.write_code),
     path('save_page', views.save_page),
+    path('start_demo_en', views.start_demo_en),
+    path('index_en', views.index_en),
+    path('custom_action_en', views.custom_action_en),
+    path('show_info_en', views.show_info_en),
+    path('record_en', views.recordAndDraw_en),
 ]

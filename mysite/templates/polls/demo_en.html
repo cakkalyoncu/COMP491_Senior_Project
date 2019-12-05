@@ -9,17 +9,17 @@
 </head>
 <body>
 	
-<h2 class="demotitle"> Hikaye Çizim Arayüzü </h2>
+<h2 class="demotitle"> Speech to Sketch Demo </h2>	
 
 <div style="margin-right: 20%; margin-top: 20px; margin-left: 20%" >
 <p style="font-size:16px"> 
-	Kayıt butonuna tıklayıp bir cümle söyleyin. Bir objenin boyutunu, sayısını, rengini ve daha önceki objelere göre konumunu belirtebilirsiniz.
-        </p></div>
+	Click the record button and say a sentence. The sketcher can draw only one object at once.
+        You can specify the size, color and relative location of the object.</p></div>
 <div style="height: 450px;display: table;width: 100%;">
 	<div style="vertical-align: middle;display: table-cell;background-color:#FFEED6;width: 15%;">	
 
 		{% load static %}
-		<form action='index' method='GET'>
+		<form action='index_en' method='GET'>
 			<button type="submit" name="button" class="button back"><span class="center"></span></button>		
 		</form>		
 	</div>
@@ -36,7 +36,7 @@
 	
 	<div style="vertical-align: middle;left;display: table-cell;width: 15%;background-color:#FFEED6;">
 		<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
-			<form action='record' method='GET' style= "display: inline-block;">
+			<form action='record_en' method='GET' style= "display: inline-block;">
 				<button type="submit" name="record" class="button record64"><span class="center"></span></button>
 			</form>
 			<button type="submit" name="button" class="button stop64"><span class="center"></span></button>
@@ -44,7 +44,7 @@
 	</div>
 	
 </div>
-<h2 contenteditable="true" class="demotitle"> Hikayeniz </h2>
+<h2 contenteditable="true" class="demotitle"> Your Story </h2>
 <div style="vertical-align: center; display: table-cell;width: 15%;background-color:#FFEED6;">
 	<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
         <form action='save_page' method='GET' style= "display: inline-block;">
