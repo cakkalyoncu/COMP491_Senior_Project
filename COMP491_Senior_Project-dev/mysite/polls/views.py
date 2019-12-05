@@ -119,6 +119,7 @@ def recordAndDraw(request):
             if(defined_obj_ind>=0):
                 obj_hist[defined_obj_ind]["location"] = obj.location
                 obj_hist[defined_obj_ind]["action"] = obj.action
+                
             else:
                 name = obj["name"]
                 if(obj["prev"])
