@@ -121,6 +121,7 @@ def create_new_canvas(request):
 
 
 def recordAndDraw(request):
+    print(museum_items.keys())
     global weather_state
     context = record()
     cumle = context["origin"]
@@ -135,22 +136,29 @@ def recordAndDraw(request):
         else:
 
             name = obj["name"]
-            fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
-            print(obj["action"])
-            action = actions(obj["action"])
-            if not os.path.exists(fileName):
-                error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
-                return render(request, 'polls/demo.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
+            if name in museum_items.keys():
+                print("here")
+                file_path = "../static/museum_imgs/" + name + "." + museum_items[name]
+                obj["file_path"] = file_path
+                obj_hist.append(json.dumps(obj))
+                print(obj)
+            else:
+                fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
+                print(obj["action"])
+                action = actions(obj["action"])
+                if not os.path.exists(fileName):
+                    error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
+                    return render(request, 'polls/demo.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
 
-            f = open(fileName, "r")
-            qdImages = f.read()
-            p = re.findall(r'{(.*?)}', qdImages)
-            i = random.randrange(0, len(p), 1)
-            y = json.loads("{" + p[i] + "}")
-            obj["strokeArray"] = y["drawing"]
-            obj_hist.append(json.dumps(obj))
+                f = open(fileName, "r")
+                qdImages = f.read()
+                p = re.findall(r'{(.*?)}', qdImages)
+                i = random.randrange(0, len(p), 1)
+                y = json.loads("{" + p[i] + "}")
+                obj["strokeArray"] = y["drawing"]
+                obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo.html', {'story': "".join(s), 'sentence': sentence, 'json': obj_hist,
-                                           'weather': weather_state})
+                                               'weather': weather_state, 'story_hist': story_hist})
 
 
 def recordAndDraw_en(request):
@@ -160,6 +168,7 @@ def recordAndDraw_en(request):
     story.append(cumle)
     s = process_Story()
     obj_list = sentence_processing(cumle)
+    print(museum_items.keys())
     for m in obj_list:
         obj = json.loads(m)
         if "state" in obj:
@@ -178,19 +187,26 @@ def recordAndDraw_en(request):
             if(defined_obj_ind == -1):
 
                 name = obj["name"]
-                fileName = "/Users/apple/Downloads/filtereddataset/" + name + ".ndjson"
-                print(obj["action"])
-                action = actions(obj["action"])
-                if not os.path.exists(fileName):
-                    error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
-                    return render(request, 'polls/demo_en.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
-                f = open(fileName, "r")
-                qdImages = f.read()
-                p = re.findall(r'{(.*?)}', qdImages)
-                i = random.randrange(0, len(p), 1)
-                y = json.loads("{" + p[i] + "}")
-                obj["strokeArray"] = y["drawing"]
-                obj_hist.append(json.dumps(obj))
+                if name in museum_items.keys():
+                    print("here")
+                    file_path = "../static/museum_imgs/" + name + "." + museum_items[name]
+                    obj["file_path"] = file_path
+                    obj_hist.append(json.dumps(obj))
+                    print(obj)
+                else:
+                    fileName = "/Users/apple/Downloads/filtereddataset/" + name + ".ndjson"
+                    print(obj["action"])
+                    action = actions(obj["action"])
+                    if not os.path.exists(fileName):
+                        error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
+                        return render(request, 'polls/demo_en.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
+                    f = open(fileName, "r")
+                    qdImages = f.read()
+                    p = re.findall(r'{(.*?)}', qdImages)
+                    i = random.randrange(0, len(p), 1)
+                    y = json.loads("{" + p[i] + "}")
+                    obj["strokeArray"] = y["drawing"]
+                    obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo_en.html', {'story': "".join(s), 'sentence': cumle, 'json': obj_hist,
                                                   'weather': weather_state})
 

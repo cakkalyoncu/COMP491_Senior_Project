@@ -32,18 +32,22 @@ function getLocation(json_obj){
     if(loc == "random"){
         let x = randomIntFromInterval(300,400);
         let y;
-        if(json_obj.action == null || json_obj.action == undefined || json_obj.action["Action"] =="walk"){
+        if(json_obj.action == null || json_obj.action == undefined || json_obj.action["Action"] =="walk" || json_obj.action["Custom"] ){
             y = randomIntFromInterval(300,350);
             if(json_obj.size ==1.5){
                 y = randomIntFromInterval(160,180);
             }
-        }else{
-            //      alert(json_obj.action);
+            if(json_obj.size ==0.5){
+                y = randomIntFromInterval(680,700);
+            }
+        }
+        else{
             y = randomIntFromInterval(100,130);
+            if(json_obj.size ==1.5){
+                y = randomIntFromInterval(60,80);
+            }
         }
 
-        //  alert (  "x: "+ x + " y: "+ y);
-        //    alert(y);
         return [x,y];
     }
     // Has a specified position
@@ -139,10 +143,10 @@ function setup() {
             //alert(a.file_path);
             let obj;
             if(a.file_path == null || a.file_path == undefined){
-                alert("drawing obj");
+
                 obj = new DrawingObject(a.name, a.color, a.size, a.number, w, h, a.strokeArray, a.action);
+
             }else{
-                alert("image obj")
                 obj = new ImageObject(a.name, a.size, a.number, w, h, a.file_path, a.action);
             }
 
