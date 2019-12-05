@@ -1,2 +1,5 @@
 <list>
+	<action name = 'fly' id = 'bounce'></action>
+	<action name = 'goLeft' id = 'bounce'></action>
+	<action name = 'ascend' id = 'bounce'></action>
 </list>
