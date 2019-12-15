@@ -22,11 +22,10 @@ obj_hist = []
 weather_state = "sun"
 code = []
 story = []
-story_hist =[]
+s=""
 
 
 def index(request):
-    story_hist.clear()
     obj_hist.clear()
     code.clear()
     story.clear()
@@ -35,7 +34,6 @@ def index(request):
     return render(request, 'polls/index.html')
 
 def index_en(request):
-    story_hist.clear()
     obj_hist.clear()
     code.clear()
     story.clear()
@@ -70,6 +68,25 @@ def ascend(request):
     code.append("ascend")
     return render(request, 'polls/readyToDraw.html', {'actions': code})
 
+def goLeft_en(request):
+    code.append("goLeft")
+    return render(request, 'polls/readyToDraw_en.html', {'actions': code})
+
+
+def fly_en(request):
+    code.append("fly")
+    return render(request, 'polls/readyToDraw_en.html', {'actions': code})
+
+
+def goRight_en(request):
+    code.append("goRight")
+    return render(request, 'polls/readyToDraw_en.html', {'actions': code})
+
+
+def ascend_en(request):
+    code.append("ascend")
+    return render(request, 'polls/readyToDraw_en.html', {'actions': code})
+
 
 def write_code(request):
     fiil = request.GET["n"]
@@ -99,6 +116,31 @@ def write_code(request):
     return render(request, 'polls/readyToDraw.html')
 
 
+def write_code_en(request):
+    verb = request.GET["n"]
+    f1 = open("static/verbs.txt", "a")
+    f1.write(verb)
+    readFile = open("static/test.xml")
+    lines = readFile.readlines()
+    readFile.close()
+    w = open("static/test.xml", 'w')
+    w.writelines([item for item in lines[:-1]])
+    w.close()
+    f = open("static/test.xml", "a")
+    for x in code:
+        if x == "goRight":
+            f.write("\t<action name = 'goRight' id = '"+ verb +"'></action>\n")
+        elif x == "goLeft":
+            f.write("\t<action name = 'goLeft' id = '"+ verb +"'></action>\n")
+        elif x == "fly":
+            f.write("\t<action name = 'fly' id = '"+ verb +"'></action>\n")
+        elif x == "ascend":
+            f.write("\t<action name = 'ascend' id = '"+ verb +"'></action>\n")
+    f.write("</list>\n")
+
+    return render(request, 'polls/readyToDraw_en.html')
+
+
 def actions(id):
     actions = []
     tree = ET.parse("static/test.xml")
@@ -121,9 +163,12 @@ def create_new_canvas(request):
 
 
 def recordAndDraw(request):
+    global s
     print(museum_items.keys())
     global weather_state
     context = record()
+    if "error" in context:
+        return render(request, 'polls/demo.html', {'story': "".join(s), 'error': context["error"], 'json': obj_hist, 'weather': weather_state})
     cumle = context["origin"]
     story.append(cumle)
     s = process_Story()
@@ -143,7 +188,7 @@ def recordAndDraw(request):
                 obj_hist.append(json.dumps(obj))
                 print(obj)
             else:
-                fileName = "/Users/apple/Downloads/filtered/" + name + ".ndjson"
+                fileName = "/Users/apple/Downloads/filteredDataset/" + name + ".ndjson"
                 print(obj["action"])
                 action = actions(obj["action"])
                 if not os.path.exists(fileName):
@@ -158,12 +203,15 @@ def recordAndDraw(request):
                 obj["strokeArray"] = y["drawing"]
                 obj_hist.append(json.dumps(obj))
     return render(request, 'polls/demo.html', {'story': "".join(s), 'sentence': sentence, 'json': obj_hist,
-                                               'weather': weather_state, 'story_hist': story_hist})
+                                               'weather': weather_state})
 
 
 def recordAndDraw_en(request):
+    global s
     global weather_state
     context = record_en()
+    if "error" in context:
+        return render(request, 'polls/demo_en.html', {'story': "".join(s), 'error': context["error"], 'json': obj_hist, 'weather': weather_state})
     cumle = context["origin"]
     story.append(cumle)
     s = process_Story()
@@ -194,7 +242,7 @@ def recordAndDraw_en(request):
                     obj_hist.append(json.dumps(obj))
                     print(obj)
                 else:
-                    fileName = "/Users/apple/Downloads/filtereddataset/" + name + ".ndjson"
+                    fileName = "/Users/apple/Downloads/filteredDataset/" + name + ".ndjson"
                     print(obj["action"])
                     action = actions(obj["action"])
                     if not os.path.exists(fileName):
@@ -210,6 +258,55 @@ def recordAndDraw_en(request):
     return render(request, 'polls/demo_en.html', {'story': "".join(s), 'sentence': cumle, 'json': obj_hist,
                                                   'weather': weather_state})
 
+
+def draw_text(request):
+    global weather_state
+    cumle = request.GET["text"]
+    story.append(cumle)
+    s = process_Story()
+    obj_list = sentence_processing(cumle)
+    print(museum_items.keys())
+    for m in obj_list:
+        obj = json.loads(m)
+        if "state" in obj:
+            weather_state = obj["state"]
+        else:
+            defined_obj_ind = -1
+            print(json.dumps(obj))
+            if obj["prev"]:
+                for object_ind in range(0, len(obj_hist)):
+                    a = json.loads(obj_hist[object_ind])
+                    if a["name"] == obj["name"]:
+                        defined_obj_ind = object_ind
+                        a["location"] = obj["location"]
+                        a["action"] = obj["action"]
+                        obj_hist[defined_obj_ind] = json.dumps(a)
+
+            if(defined_obj_ind == -1):
+
+                name = obj["name"]
+                if name in museum_items.keys():
+                    print("here")
+                    file_path = "../static/museum_imgs/" + name + "." + museum_items[name]
+                    obj["file_path"] = file_path
+                    obj_hist.append(json.dumps(obj))
+                    print(obj)
+                else:
+                    fileName = "/Users/apple/Downloads/filteredDataset/" + name + ".ndjson"
+                    print(obj["action"])
+                    action = actions(obj["action"])
+                    if not os.path.exists(fileName):
+                        error = "Sorry but this word is not in our vocabulary yet, Please try another sentence"
+                        return render(request, 'polls/demo_en.html', {'story': "".join(s), 'error': error, 'json': obj_hist, 'weather': weather_state})
+                    f = open(fileName, "r")
+                    qdImages = f.read()
+                    p = re.findall(r'{(.*?)}', qdImages)
+                    i = random.randrange(0, len(p), 1)
+                    y = json.loads("{" + p[i] + "}")
+                    obj["strokeArray"] = y["drawing"]
+                    obj_hist.append(json.dumps(obj))
+    return render(request, 'polls/demo_en.html', {'story': "".join(s), 'sentence': cumle, 'json': obj_hist,
+                                                  'weather': weather_state})
 
 def find_defined_object(obj):
     print(obj);
@@ -234,9 +331,11 @@ def upload(request):
 
 
 def start_demo(request):
+    story.clear()
     return render(request, 'polls/demo.html')
 
 def start_demo_en(request):
+    story.clear()
     return render(request, 'polls/demo_en.html')
 
 
@@ -244,10 +343,14 @@ def save_page(request):
     obj_hist.clear()
     s = process_Story()
     s1 = "".join(s)
-    size = len(story_hist)
-    story_hist.append({"story": s1, "file": str(size)+".png"})
-    story.clear()
-    return render(request, 'polls/demo.html', {'story_hist': story_hist, 'weather': weather_state, 'var': "output.png"})
+    return render(request, 'polls/demo.html', {'story': "".join(s), 'json': obj_hist, 'weather': weather_state})
+
+
+def save_page_en(request):
+    obj_hist.clear()
+    s = process_Story()
+    s1 = "".join(s)
+    return render(request, 'polls/demo_en.html', {'story': "".join(s), 'json': obj_hist,  'weather': weather_state})
 
 
 def draw_objects(request):
@@ -290,10 +393,11 @@ def sentence_processing(sentence):
                     conj_obj.location = main_obj.location
                 else:
                     main_obj.location = conj_obj.location
+                if (not conj.lemma_ == "-PRON-"):
+                    main_lst_json.append(conj_obj.to_json())
+            if (not main.lemma_ == "-PRON-"):
+                main_lst_json.append(main_obj.to_json())
 
-                main_lst_json.append(conj_obj.to_json())
-
-            main_lst_json.append(main_obj.to_json())
     print(sentence)
     return main_lst_json
 
@@ -304,7 +408,7 @@ def record():
     translated = ""
     with sr.Microphone() as source:
         # r.adjust_for_ambient_noise(source)
-        audio = r.listen(source)
+        audio = r.listen(source, timeout=15)
 
     try:
         sentence = r.recognize_google(audio, language="tr-TR")
@@ -314,9 +418,11 @@ def record():
         translated = result['translatedText']
     except sr.UnknownValueError:
         text = "Google Speech Recognition could not understand audio"
+        return {'error': text}
     except sr.RequestError as e:
         text = "Could not request results from Google Speech Recognition service; {0}".format(e)
-    context = {'origin': sentence, 'text': translated, 'error': text}
+        return {'error': text}
+    context = {'origin': sentence, 'text': translated}
     return context
 
 
@@ -326,14 +432,16 @@ def record_en():
     translated = ""
     with sr.Microphone() as source:
         # r.adjust_for_ambient_noise(source)
-        audio = r.listen(source)
+        audio = r.listen(source, timeout=15)
     try:
-        sentence = r.recognize_google(audio, language="en-EN")
+        sentence = r.recognize_google(audio)
     except sr.UnknownValueError:
         text = "Google Speech Recognition could not understand audio"
+        return {'error': text}
     except sr.RequestError as e:
         text = "Could not request results from Google Speech Recognition service; {0}".format(e)
-    context = {'origin': sentence, 'error': text}
+        return {'error': text}
+    context = {'origin': sentence}
     return context
 
 
@@ -350,15 +458,15 @@ class ImageObject:
 
 
 class Object:
-    def __init__(self, name, color="black", size=1, number=1, location="random", action=None, file_path = None,):
+    def __init__(self, name, color="black", size=1, number=1, location="random", action=None, prev=False):
         self.name = name
         self.color = color
         self.size = size
         self.number = number
         self.location = location
         self.action = action
+        self.prev = prev
         self.strokeArray = []
-        self.file_path = file_path
 
     def print(self):
         print("Name: ", self.name, "\tColor:", self.color, " Size:", self.size, " Number:", self.number, " Location:",
@@ -451,7 +559,7 @@ def isWeather(doc):
     return False
 
 
-prep_map = [["on", "above", "over", "up"], ["beneath", "below", "down", "under", "underneath"]]
+prep_map = [["on", "above", "over", "up"], ["beneath", "below", "down", "under", "underneath"],["in","inside"]]
 
 
 def isPreposition(feature):
@@ -460,6 +568,8 @@ def isPreposition(feature):
             return "on"
         elif (feature.lemma_ in prep_map[1]):
             return "under"
+        elif (feature.lemma_ in prep_map[2]):
+            return "in"
     else:
         return False
 
@@ -470,7 +580,7 @@ def isAction(feature):
     if (feature.lemma_ in action_map[0]):
         return {"Action": "fly", "Custom": False}
     elif (feature.lemma_ in action_map[1]):
-        return {"Action": "run", "Custom": False}
+        return {"Action": "walk", "Custom": False}
     elif (feature.lemma_ in action_map[2]):
         return {"Action": "walk", "Custom": False}
     else:
@@ -522,11 +632,14 @@ def match_features(feature_lst, main_obj_token):
 
     if (main_obj_token.tag_ == "NNS"):
         ob.number = random.randint(2, 5)
+
     for feature in feature_lst:
         feature_txt = feature.lemma_
         size = isSize(feature_txt)
+        if (feature_txt == "the"):
+            ob.prev = True
 
-        if (size):
+        elif (size):
             ob.size = size
 
         elif (isColor(feature_txt)):
@@ -542,6 +655,7 @@ def match_features(feature_lst, main_obj_token):
                            "Location": location}
         elif (isAction(feature)):
             ob.action = isAction(feature)
+
     return ob
 
 

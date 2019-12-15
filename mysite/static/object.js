@@ -37,13 +37,7 @@ class GenObject {
 
     }
 
-    fly() {
-        if(this.location_Y >=40 && this.continue){
-            this.location_Y -= 30;
-        }else{
-            this.continue = false;
-        }
-    }
+
     ascend() {
         if(this.location_Y<=310 && this.continue){
             this.location_Y += 30;
@@ -52,7 +46,9 @@ class GenObject {
         }
     }
     goLeft() {
-        if(this.location_X >= 10 && this.continue){
+        if(this.size== 0.5 && this.location_X >= -100 && this.continue){
+            this.location_X -= 30;
+        } else if(this.size == 1 && this.location_X >= 40 && this.continue){
             this.location_X -= 30;
         }else{
             this.continue = false;
@@ -65,6 +61,13 @@ class GenObject {
             this.continue = false;
         }
 
+    }
+    fly() {
+        if(this.location_Y >=40 && this.continue){
+            this.location_Y -= 30;
+        }else{
+            this.continue = false;
+        }
     }
 }
 

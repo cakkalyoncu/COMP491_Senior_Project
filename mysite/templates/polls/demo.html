@@ -52,8 +52,7 @@
 		<button type="submit" name="record" class="button plus64" onclick='newPage()'><span class="center"></span></button>
         </form>
 	</div>
-	
-	<h2 contenteditable="true" class="demotitle"> Hikayeniz </h2>
+	<h2 contenteditable="true" class="demotitle" id ="title"> Hikayeniz </h2>
 	
 	<div style="background-color:#FFF7ED;width: 80%;height:60%;vertical-align: middle;margin-bottom:10px;margin-left:10%"> {{ story }}</div>
 
@@ -70,6 +69,14 @@
 	
 
 </div>
+
+<p></p>
+	<div style="vertical-align: middle; width: 80%;margin:auto;margin-top:20px;text-align: center;">
+        <form action='start_demo' method='GET' style= "display: inline-block;">
+		<button type="submit" class= "demo" name="clear" onclick='clearStorage()'>Hikayeyi Sil</button>
+        </form>
+
+        </div>
 
 </body>
 </html>

@@ -10,8 +10,9 @@ let cloudy = false;
 var image = new Image();
 let speed;
 let time;
-let canvas;
 let memory;
+let indoor= new Image();
+let indoor_bool = false;
 
 function randomIntFromInterval(min, max) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -27,24 +28,47 @@ function findObject(relativeTo){
 }
 
 function getLocation(json_obj){
+    let loc_arr_big_sky = [{"x":50, "y":67},{"x":250, "y":79}, {"x":450, "y":63} ]
+    let loc_arr_sky = [{"x":50, "y":100},{"x":250, "y":110}, {"x":450, "y":120}, {"x":650, "y":125}, {"x":850, "y":130} ]
+    let loc_arr_small_sky = [{"x":10, "y":110}, {"x":300, "y":130}, {"x":600, "y":140}, {"x":850, "y":155}, {"x":1250, "y":167} , {"x":1450, "y":185}, {"x":1750, "y":190} ]
+    let loc_arr_big_ground = [{"x":50, "y":170},{"x":250, "y":163}, {"x":450, "y":160} ]
+    let loc_arr_ground = [{"x":50, "y":320},{"x":250, "y":300}, {"x":450, "y":290}, {"x":650, "y":300}, {"x":850, "y":320} ]
+    let loc_arr_small_ground = [{"x":10, "y":715}, {"x":300, "y":695}, {"x":600, "y":690}, {"x":850, "y":685}, {"x":1250, "y":695} , {"x":1450, "y":700}, {"x":1750, "y":720} ]
     let loc = json_obj.location;
     //    alert(json_obj.action);
-    if(loc == "random"){
+    if(loc == "random" || loc.Location=="house"){
         let x = randomIntFromInterval(300,400);
         let y;
         if(json_obj.action == null || json_obj.action == undefined || json_obj.action["Action"] =="walk" || json_obj.action["Custom"] ){
-            y = randomIntFromInterval(300,350);
+            y = randomIntFromInterval(300,330);
             if(json_obj.size ==1.5){
-                y = randomIntFromInterval(160,180);
-            }
-            if(json_obj.size ==0.5){
-                y = randomIntFromInterval(680,700);
+                let index = randomIntFromInterval(0,2);
+                x = loc_arr_big_ground[index]["x"];
+                y = loc_arr_big_ground[index]["y"];
+            } else if(json_obj.size ==0.5){
+                let index = randomIntFromInterval(0,6);
+                x = loc_arr_small_ground[index]["x"];
+                y = loc_arr_small_ground[index]["y"];
+            } else if(json_obj.size ==1){
+                let index = randomIntFromInterval(0,4);
+                x = loc_arr_ground[index]["x"];
+                y = loc_arr_ground[index]["y"];
             }
         }
         else{
             y = randomIntFromInterval(100,130);
             if(json_obj.size ==1.5){
-                y = randomIntFromInterval(60,80);
+                let index = randomIntFromInterval(0,2);
+                x = loc_arr_big_sky[index]["x"];
+                y = loc_arr_big_sky[index]["y"];
+            } else if(json_obj.size ==1){
+                let index = randomIntFromInterval(0,4);
+                x = loc_arr_sky[index]["x"];
+                y = loc_arr_sky[index]["y"];
+            } else if(json_obj.size ==0.5){
+                let index = randomIntFromInterval(0,6);
+                x = loc_arr_small_sky[index]["x"];
+                y = loc_arr_small_sky[index]["y"];
             }
         }
 
@@ -91,11 +115,15 @@ function ground(color){
     vertex(0,410);
     endShape();
 }
+function clearStorage(){
+  localStorage.clear();
+}
+
 
 let width = 1060;
 let height = 450;
 
-function setup() {	
+function setup() {
     if(window.localStorage.getItem("pagecount")== null){
         localStorage.setItem("pagecount", "0");
     }
@@ -105,6 +133,10 @@ function setup() {
             document.getElementById("p"+i).src=localStorage.getItem("p"+i);
         }
     }
+    if(window.localStorage.getItem("title")!= null){
+        document.getElementById("title").textContent =localStorage.getItem("title");
+    }
+
     memory =0;
     speed = true;
     time = 0;
@@ -143,6 +175,10 @@ function setup() {
 
 
         let location = getLocation(a);
+        if(a.location.Location=="house"){
+            indoor = loadImage("../static/museum_imgs/indoor.jpg");
+            indoor_bool = true;
+        }
         for(let m =0; m< a.number; m++){
 
             let w = location[0]+ (m * 120);
@@ -164,10 +200,12 @@ function setup() {
 
         time=0;
     }
-    canvas = createCanvas(width,height);
+    var canvas = createCanvas(width,height);
     canvas.parent("sketchholder");
     frameRate(20);
 }
+
+
 
 function newPage() {
     image.src = canvas.toDataURL("image/png");
@@ -176,6 +214,7 @@ function newPage() {
     localStorage.setItem(imgstring, image.src);
     let newcount=pc+1;
     localStorage.setItem("pagecount", newcount);
+    localStorage.setItem("title",  document.getElementById("title").textContent);
     canvas.clear();
 }
 
@@ -288,6 +327,9 @@ function draw() {
     background(sky_blue);
     ground(color(0,255,0));
     sun();
+    if(indoor_bool){
+        image(indoor, 0 , 0,   width ,  height);
+    }
     //translate(-275, -175);
     //box(85);
     if(snow){
@@ -300,32 +342,36 @@ function draw() {
     }
 
     for (let i = 0; i< obj_array.length; i++)   {
+
         if(obj_array[i].action != null && obj_array[i].action != undefined && obj_array[i].action != "") {
             if (obj_array[i].action["Custom"]) {
+
                 let l = obj_array[i].action["Action"].length;
-                if (obj_array[i].action["Action"][time % l] == "fly") {
+                if (obj_array[i].action["Action"][time % l] == "fly" && speed) {
                     obj_array[i].fly();
-                } else if (obj_array[i].action["Action"][time % l] == "ascend") {
+                } else if (obj_array[i].action["Action"][time % l] == "ascend" && speed) {
                     obj_array[i].ascend();
-                } else if (obj_array[i].action["Action"][time % l] == "goRight") {
+                } else if (obj_array[i].action["Action"][time % l] == "goRight" && speed) {
                     obj_array[i].goRight();
-                } else if (obj_array[i].action["Action"][time % l] == "goLeft") {
+                } else if (obj_array[i].action["Action"][time % l] == "goLeft" && speed) {
                     obj_array[i].goLeft();
                 }
-                if (speed) {
-                    time += 1;
-                    speed = false;
-                } else {
-                    speed = true;
-                }
+
             } else {
                 obj_array[i].walk();
             }
         }
+
         //alert(obj_array[i].name);
         obj_array[i].display();
 
     }
+    if (speed) {
+            time += 1;
+            speed = false;
+        } else {
+            speed = true;
+        }
 
 }
 

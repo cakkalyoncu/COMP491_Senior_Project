@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
     <head>
         <title>Upload Files</title>
     </head>
@@ -23,4 +26,8 @@
             <p>Uploaded file: <a href="{{ url }}"> {{ url }}</a> </p>
         {% endif %}
     </body>
+
+<form action='index_en' method='GET'>
+			<button type="submit" name="button" class="button back"><span class="center"></span></button>
+		</form>
 </html>

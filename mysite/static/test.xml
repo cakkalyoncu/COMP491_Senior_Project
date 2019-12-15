@@ -2,4 +2,8 @@
 	<action name = 'fly' id = 'bounce'></action>
 	<action name = 'goLeft' id = 'bounce'></action>
 	<action name = 'ascend' id = 'bounce'></action>
+	<action name = 'goLeft' id = 'roll'></action>
+	<action name = 'fly' id = 'roll'></action>
+	<action name = 'goRight' id = 'roll'></action>
+	<action name = 'ascend' id = 'roll'></action>
 </list>
